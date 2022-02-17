@@ -3,11 +3,11 @@ import pandas as pd
 from dfply import *
 
 
-# return optimal 15 player squad
-# using https://statnamara.wordpress.com/2021/02/05/finding-the-best-lazy-fantasy-football-team-using-pulp-in-python/
-def optimal_squad(dataset="2019-20", maximisation_objective="total_points"):
+# return optimal 15 player squad with help from:
+# https://statnamara.wordpress.com/2021/02/05/finding-the-best-lazy-fantasy-football-team-using-pulp-in-python/
+def optimal_full_squad(dataset="2020-21", maximisation_objective="total_points"):
 
-    # load in data to dataframe
+    # load in data to dataframe and remove unnecessary columns
     players_df = pd.read_csv(f"../../data/raw/{dataset}/players_raw.csv")
     players_df['name'] = players_df['first_name'].map(str) + ' ' + players_df['second_name'].map(str)
     players_trim = players_df[["name", maximisation_objective, "now_cost", "element_type", "team"]]
@@ -27,7 +27,7 @@ def optimal_squad(dataset="2019-20", maximisation_objective="total_points"):
     prob.solve()
 
     # print squad
-    print("\nFull Squad:")
+    print("Full Squad:")
     for i in range(0, len(players_trim)):
         if pulp.value(x[i]) == 1:
             print("{player}: {points} {objective}, {element_type}, {team}".format(
@@ -40,4 +40,4 @@ def optimal_squad(dataset="2019-20", maximisation_objective="total_points"):
 
 
 if __name__ == '__main__':
-    optimal_squad()
+    optimal_full_squad()
