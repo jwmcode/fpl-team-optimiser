@@ -22,5 +22,5 @@ def simulate_season(squad, season="2020-21"):
 
 
 if __name__ == '__main__':
-    team = [['Trent Alexander-Arnold'], ['Aaron Cresswell']]
-    simulate_season(team)
+    test_squad = [['Trent Alexander-Arnold'], ['Aaron Cresswell']]
+    simulate_season(test_squad)
