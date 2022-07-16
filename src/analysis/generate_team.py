@@ -82,9 +82,9 @@ def random_squad(season="2021-22"):
 
 if __name__ == '__main__':
 
-    # optimal_squad()
-    result = random_squad()
-    print(result)
+    optimal_squad()
+    # result = random_squad()
+    # print(result)
 
 
 
