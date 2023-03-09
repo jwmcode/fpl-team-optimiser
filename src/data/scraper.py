@@ -1,8 +1,14 @@
+import time
+
 import pandas as pd
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException
+from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException, TimeoutException
 from selenium.webdriver.common.by import By
+
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
 # needed for headless scraping, chrome detects and blocks otherwise
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36'
@@ -31,7 +37,7 @@ class Scraper:
                 self._driver = webdriver.Chrome(options=options)
                 self._driver.implicitly_wait(5)
 
-    def accept_cookies(self):
+    def _accept_cookies(self):
 
         try:
             element = self._driver.find_element(By.XPATH, '/html/body/div[2]/div/div/div[1]/div[5]/button[1]')
@@ -45,7 +51,7 @@ class Scraper:
         url = 'https://fantasy.premierleague.com/statistics'
         self._make_driver()
         self._driver.get(url)
-        self.accept_cookies()
+        self._accept_cookies()
 
         players_dict = {'second_name': [], 'team': [], 'points': [], 'form': [], 'cost': [], 'position': [],
                         'warning': []}
@@ -65,10 +71,11 @@ class Scraper:
                 players_dict['warning'].append(None)
 
             try:
-                element = self._driver.find_element(By.XPATH, '/html/body/main/div/div[2]/div/div[1]/div[3]/button[3]')
-                element.click()
-            except (ElementClickInterceptedException, NoSuchElementException):
-                # Last page has been reached
+                WebDriverWait(self._driver, 1).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div['
+                                                                                            '2]/div/div[1]/div['
+                                                                                            '3]/button[3]'))).click()
+
+            except (ElementClickInterceptedException, NoSuchElementException, TimeoutException):
                 break
 
         return pd.DataFrame(data=players_dict)

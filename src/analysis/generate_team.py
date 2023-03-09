@@ -1,19 +1,24 @@
 import pulp
 from dfply import *
+from src.data.update import manual_update_players_csv
 
 
-# return optimal 15 player squad with help from:
-# https://statnamara.wordpress.com/2021/02/05/finding-the-best-lazy-fantasy-football-team-using-pulp-in-python/
-def optimal_squad(season="2021-22", maximisation_objective="total_points"):
+def optimal_squad_balanced(season="2022-23", maximisation_objective="total_points", pre_season_updates=False):
+    """Return optimal 15 player squad
+
+    Help from https://statnamara.wordpress.com/2021/02/05/finding-the-best-lazy-fantasy-football-team-using-pulp-in-python/
+    """
 
     # load in data to dataframe and remove unnecessary columns
     players_df = pd.read_csv(f"../../data/raw/{season}/players_raw.csv")
+    if pre_season_updates:
+        players_df = manual_update_players_csv(season=season)
     players_df['name'] = players_df['first_name'].map(str) + ' ' + players_df['second_name'].map(str)
+    players_df['form*points'] = players_df.form * players_df.total_points
     players_trim = players_df[["name", maximisation_objective, "now_cost", "element_type", "team"]]
 
     # Find 15 best players in budget
     x = pulp.LpVariable.dict("player", range(0, len(players_trim)), 0, 1, cat=pulp.LpInteger)
-
     prob = pulp.LpProblem("FantasyFootball", pulp.LpMaximize)
     prob += pulp.lpSum(players_trim[maximisation_objective][i] * x[i] for i in range(0, len(players_trim)))
     prob += sum(x[i] for i in range(0, len(players_trim))) == 15
@@ -24,7 +29,6 @@ def optimal_squad(season="2021-22", maximisation_objective="total_points"):
     prob += sum(x[i] * players_trim["now_cost"][i] for i in range(0, len(players_trim))) <= 1000
     for team_id in np.unique(players_trim["team"]):
         prob += sum(x[i] for i in range(0, len(players_trim)) if players_trim["team"][i] == team_id) <= 3
-
     prob.solve()
 
     # print squad
@@ -40,9 +44,65 @@ def optimal_squad(season="2021-22", maximisation_objective="total_points"):
             ))
 
 
-# returns random 15 player squad within constraints
+# todo:unfinished
+# stars players get cost bias
+def optimal_squad_stars(season="2021-22", maximisation_objective="total_points", pre_season_updates=False,
+                        captain_ratio=0.13, vice_captain_ratio=0.1):
+
+    # select two star players first within the star player budget
+    # build optimised squad around the star players with max as remaining budget
+    return -1
+
+
+# todo: unfinished
+# first 11 gets cost bias. tries team in each formation
+def optimal_squad_subs(season="2022-23", maximisation_objective="form*points", pre_season_updates=False,
+                       sub_ratio=0.235):
+
+    # load in data to dataframe and remove unnecessary columns
+    players_df = pd.read_csv(f"../../data/raw/{season}/players_raw.csv")
+    if pre_season_updates:
+        players_df = manual_update_players_csv(season=season)
+    players_df['name'] = players_df['first_name'].map(str) + ' ' + players_df['second_name'].map(str)
+    players_df['form*points'] = players_df.form * players_df.total_points
+    players_trim = players_df[["name", maximisation_objective, "now_cost", "element_type", "team"]]
+
+    formations = [[4, 4, 2], [4, 5, 1], [4, 3, 3], [5, 4, 1], [5, 3, 2], [5, 2, 3], [3, 4, 3], [3, 5, 2]]
+    optimal_team = None
+
+    for formation in formations:
+        # Find 15 best players in budget
+        x = pulp.LpVariable.dict("player", range(0, len(players_trim)), 0, 1, cat=pulp.LpInteger)
+        prob = pulp.LpProblem("FantasyFootball", pulp.LpMaximize)
+        prob += pulp.lpSum(players_trim[maximisation_objective][i] * x[i] for i in range(0, len(players_trim)))
+        prob += sum(x[i] for i in range(0, len(players_trim))) == sum(formation, 1)
+        prob += sum(x[i] for i in range(0, len(players_trim)) if players_trim["element_type"][i] == 1) == 1
+        prob += sum(x[i] for i in range(0, len(players_trim)) if players_trim["element_type"][i] == 2) == formation[0]
+        prob += sum(x[i] for i in range(0, len(players_trim)) if players_trim["element_type"][i] == 3) == formation[1]
+        prob += sum(x[i] for i in range(0, len(players_trim)) if players_trim["element_type"][i] == 4) == formation[2]
+        prob += sum(x[i] * players_trim["now_cost"][i] for i in range(0, len(players_trim))) <= 1000 - (
+                    1000 * sub_ratio)
+        for team_id in np.unique(players_trim["team"]):
+            prob += sum(x[i] for i in range(0, len(players_trim)) if players_trim["team"][i] == team_id) <= 3
+        prob.solve()
+
+        # print squad
+        print("Full Squad:")
+        for i in range(0, len(players_trim)):
+            if pulp.value(x[i]) == 1:
+                print("{player}: {points} {objective}, position type {element_type}, team {team}".format(
+                    player=players_trim["name"][i],
+                    points=players_trim[maximisation_objective][i],
+                    element_type=players_trim["element_type"][i],
+                    team=players_trim["team"][i],
+                    objective=maximisation_objective
+                ))
+
+
 # todo: needs 3 club player limit
 def random_squad(season="2021-22"):
+    """ Returns random 25 player squad within constraints
+    """
 
     players_df = pd.read_csv(f"../../data/raw/{season}/players_raw.csv")
     players_df['name'] = players_df['first_name'].map(str) + ' ' + players_df['second_name'].map(str)
@@ -81,12 +141,4 @@ def random_squad(season="2021-22"):
 
 
 if __name__ == '__main__':
-
-    optimal_squad()
-    # result = random_squad()
-    # print(result)
-
-
-
-
-
+    optimal_squad_balanced()
