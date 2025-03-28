@@ -6,7 +6,7 @@ import pandas as pd
 # only works for 21-22 and 20-21 data because of player name format differences in earlier data
 def simulate_season(squad, season="2020-21"):
 
-    df_all = pd.read_csv(f"../../data/raw/{season}/gws/merged_gw.csv")
+    df_all = pd.read_csv(f"../data/{season}/gws/merged_gw.csv")
     merged_squad = squad[0] + squad[1]
     df_squad = df_all[df_all['name'].str.contains('|'.join(merged_squad))].reset_index(drop=True)
 

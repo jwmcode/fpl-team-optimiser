@@ -1,18 +1,15 @@
 import pulp
 from dfply import *
-from src.data.update import manual_update_players_csv
 
 
-def optimal_squad_balanced(season="2022-23", maximisation_objective="total_points", pre_season_updates=False):
+def optimal_squad_balanced(season="2024-25", maximisation_objective="total_points"):
     """Return optimal 15 player squad
 
     Help from https://statnamara.wordpress.com/2021/02/05/finding-the-best-lazy-fantasy-football-team-using-pulp-in-python/
     """
 
     # load in data to dataframe and remove unnecessary columns
-    players_df = pd.read_csv(f"../../data/raw/{season}/players_raw.csv")
-    if pre_season_updates:
-        players_df = manual_update_players_csv(season=season)
+    players_df = pd.read_csv(f"../data/{season}/players_raw.csv")
     players_df['name'] = players_df['first_name'].map(str) + ' ' + players_df['second_name'].map(str)
     players_df['form*points'] = players_df.form * players_df.total_points
     players_trim = players_df[["name", maximisation_objective, "now_cost", "element_type", "team"]]
@@ -56,13 +53,10 @@ def optimal_squad_stars(season="2021-22", maximisation_objective="total_points",
 
 # todo: unfinished
 # first 11 gets cost bias. tries team in each formation
-def optimal_squad_subs(season="2022-23", maximisation_objective="form*points", pre_season_updates=False,
-                       sub_ratio=0.235):
+def optimal_squad_subs(season="2022-23", maximisation_objective="total_points", sub_ratio=0.235):
 
     # load in data to dataframe and remove unnecessary columns
-    players_df = pd.read_csv(f"../../data/raw/{season}/players_raw.csv")
-    if pre_season_updates:
-        players_df = manual_update_players_csv(season=season)
+    players_df = pd.read_csv(f"../data/{season}/players_raw.csv")
     players_df['name'] = players_df['first_name'].map(str) + ' ' + players_df['second_name'].map(str)
     players_df['form*points'] = players_df.form * players_df.total_points
     players_trim = players_df[["name", maximisation_objective, "now_cost", "element_type", "team"]]
@@ -104,7 +98,7 @@ def random_squad(season="2021-22"):
     """ Returns random 25 player squad within constraints
     """
 
-    players_df = pd.read_csv(f"../../data/raw/{season}/players_raw.csv")
+    players_df = pd.read_csv(f"../data/{season}/players_raw.csv")
     players_df['name'] = players_df['first_name'].map(str) + ' ' + players_df['second_name'].map(str)
     players_df = players_df[["name", "now_cost", "element_type", "team"]]
     players_df['in_squad'] = 0
@@ -141,4 +135,5 @@ def random_squad(season="2021-22"):
 
 
 if __name__ == '__main__':
-    optimal_squad_balanced()
+    # optimal_squad_balanced()
+    print(random_squad())
