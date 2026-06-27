@@ -2,9 +2,9 @@ import pulp
 from dfply import *
 
 
-def optimal_squad_balanced(season="2024-25", maximisation_objective="total_points"):
-    """Return optimal 15 player squad
-
+def optimal_squad_balanced(season: str = "2024-25", maximisation_objective: str = "total_points"):
+    """
+    Return optimal 15 player squad
     Help from https://statnamara.wordpress.com/2021/02/05/finding-the-best-lazy-fantasy-football-team-using-pulp-in-python/
     """
 
@@ -43,8 +43,8 @@ def optimal_squad_balanced(season="2024-25", maximisation_objective="total_point
 
 # todo:unfinished
 # stars players get cost bias
-def optimal_squad_stars(season="2021-22", maximisation_objective="total_points", pre_season_updates=False,
-                        captain_ratio=0.13, vice_captain_ratio=0.1):
+def optimal_squad_stars(season: str = "2021-22", maximisation_objective: str = "total_points", pre_season_updates: bool = False,
+                        captain_ratio: float = 0.13, vice_captain_ratio: float = 0.1):
 
     # select two star players first within the star player budget
     # build optimised squad around the star players with max as remaining budget
@@ -53,7 +53,7 @@ def optimal_squad_stars(season="2021-22", maximisation_objective="total_points",
 
 # todo: unfinished
 # first 11 gets cost bias. tries team in each formation
-def optimal_squad_subs(season="2022-23", maximisation_objective="total_points", sub_ratio=0.235):
+def optimal_squad_subs(season: str = "2022-23", maximisation_objective: str = "total_points", sub_ratio: float = 0.235):
 
     # load in data to dataframe and remove unnecessary columns
     players_df = pd.read_csv(f"../data/{season}/players_raw.csv")
@@ -94,8 +94,9 @@ def optimal_squad_subs(season="2022-23", maximisation_objective="total_points", 
 
 
 # todo: needs 3 club player limit
-def random_squad(season="2021-22"):
-    """ Returns random 25 player squad within constraints
+def random_squad(season: str = "2021-22"):
+    """ 
+    Returns random 25 player squad within constraints
     """
 
     players_df = pd.read_csv(f"../data/{season}/players_raw.csv")

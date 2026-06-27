@@ -1,10 +1,15 @@
 import pandas as pd
+from typing import List
 
 
-# assume: no chips, no transfers, no captain bonus
-# squad 2d list, one list for first 11, one for subs
-# only works for 21-22 and 20-21 data because of player name format differences in earlier data
-def simulate_season(squad, season="2020-21"):
+def backtest_season(squad: List[List[str]], season: str = "2020-21"):
+    """
+    Backtests a squad for a given season and returns total points scored
+
+    Assume: no chips, no transfers, no captain bonus
+    Squad 2d list, first list for first 11, second for subs
+    Only works for 21-22 and 20-21 data because of player name format differences in earlier data
+    """
 
     df_all = pd.read_csv(f"../data/{season}/gws/merged_gw.csv")
     merged_squad = squad[0] + squad[1]
@@ -23,4 +28,4 @@ def simulate_season(squad, season="2020-21"):
 
 if __name__ == '__main__':
     test_squad = [['Trent Alexander-Arnold'], ['Aaron Cresswell']]
-    simulate_season(test_squad)
+    backtest_season(test_squad)
